@@ -7,6 +7,10 @@ namespace Grocery.Core.Helpers
     {
         public static string HashPassword(string password)
         {
+            // Null/empty/whitespace check voor input
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null, empty or whitespace", nameof(password));
+
             byte[] salt = RandomNumberGenerator.GetBytes(16);
             var hash = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(password), salt, 100000, HashAlgorithmName.SHA256, 32);
             return Convert.ToBase64String(salt) + "." + Convert.ToBase64String(hash);
@@ -14,14 +18,27 @@ namespace Grocery.Core.Helpers
 
         public static bool VerifyPassword(string password, string storedHash)
         {
-            var parts = storedHash.Split('.');
-            if (parts.Length != 2) return false;
+            // Null/empty/whitespace checks voor beide parameters
+            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(storedHash))
+                return false;
 
-            var salt = Convert.FromBase64String(parts[0]);
-            var hash = Convert.FromBase64String(parts[1]);
-            var inputHash = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(password), salt, 100000, HashAlgorithmName.SHA256, 32);
+            try
+            {
+                var parts = storedHash.Split('.');
+                if (parts.Length != 2)
+                    return false;
 
-            return CryptographicOperations.FixedTimeEquals(inputHash, hash);
+                var salt = Convert.FromBase64String(parts[0]);
+                var hash = Convert.FromBase64String(parts[1]);
+                var inputHash = Rfc2898DeriveBytes.Pbkdf2(Encoding.UTF8.GetBytes(password), salt, 100000, HashAlgorithmName.SHA256, 32);
+
+                return CryptographicOperations.FixedTimeEquals(inputHash, hash);
+            }
+            catch
+            {
+                // Als er iets fout gaat (ongeldige base64, etc.), return false
+                return false;
+            }
         }
     }
 }

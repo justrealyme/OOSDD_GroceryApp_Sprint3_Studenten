@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Grocery.Core.Data\Grocery.Core.Data.csproj" />
     <ProjectReference Include="..\Grocery.Core\Grocery.Core.csproj" />
   </ItemGroup>
 
