@@ -2,50 +2,52 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Grocery.App.ViewModels"
-             x:Class="Grocery.App.Views.LoginView"
-             x:DataType="vm:LoginViewModel"
-             Title="Inloggen">
+             x:Class="Grocery.App.Views.RegisterView"
+             x:DataType="vm:RegisterViewModel"
+             Title="Registreren">
     <ScrollView>
         <StackLayout Padding="20" VerticalOptions="Center" Spacing="15">
-            <Label Text="GroceryApp" 
-                   FontSize="32" 
-                   HorizontalOptions="Center" 
-                   FontAttributes="Bold"
-                   TextColor="#512BD4"/>
-
-            <Label Text="Inloggen" 
-                   FontSize="24" 
-                   HorizontalOptions="Center" 
+            <Label Text="Nieuwe gebruiker registreren"
+                   FontSize="24"
+                   HorizontalOptions="Center"
                    FontAttributes="Bold"/>
 
             <Frame BackgroundColor="LightGray" Padding="15" CornerRadius="10">
                 <StackLayout Spacing="15">
-                    <Entry Placeholder="E-mailadres" 
-                           Text="{Binding Email}" 
+                    <Entry Placeholder="Volledige naam"
+                           Text="{Binding Name}"
+                           Keyboard="Text" />
+
+                    <Entry Placeholder="E-mailadres"
+                           Text="{Binding Email}"
                            Keyboard="Email" />
 
-                    <Entry Placeholder="Wachtwoord" 
-                           Text="{Binding Password}" 
+                    <Entry Placeholder="Wachtwoord"
+                           Text="{Binding Password}"
+                           IsPassword="True" />
+
+                    <Entry Placeholder="Bevestig wachtwoord"
+                           Text="{Binding ConfirmPassword}"
                            IsPassword="True" />
                 </StackLayout>
             </Frame>
 
-            <Button Text="Inloggen" 
-                    Command="{Binding LoginCommand}" 
+            <Button Text="Registreren"
+                    Command="{Binding RegisterCommand}"
                     BackgroundColor="#512BD4"
                     TextColor="White"
                     FontAttributes="Bold"
                     HeightRequest="50"/>
 
-            <Button Text="Registreren" 
-                    Command="{Binding GoToRegisterCommand}" 
+            <Button Text="Terug naar inloggen"
+                    Command="{Binding GoToLoginCommand}"
                     BackgroundColor="Transparent"
                     TextColor="#512BD4"
                     BorderColor="#512BD4"
                     BorderWidth="1"/>
 
-            <Label Text="{Binding LoginMessage}" 
-                   TextColor="Red" 
+            <Label Text="{Binding RegisterMessage}"
+                   TextColor="{Binding MessageColor}"
                    HorizontalOptions="Center"
                    FontAttributes="Bold"/>
         </StackLayout>
