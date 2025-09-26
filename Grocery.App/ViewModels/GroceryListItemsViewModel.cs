@@ -15,14 +15,19 @@ namespace Grocery.App.ViewModels
         private readonly IGroceryListItemsService _groceryListItemsService;
         private readonly IProductService _productService;
         private readonly IFileSaverService _fileSaverService;
-        
+
         public ObservableCollection<GroceryListItem> MyGroceryListItems { get; set; } = [];
         public ObservableCollection<Product> AvailableProducts { get; set; } = [];
+        public ObservableCollection<Product> FilteredProducts { get; set; } = [];
 
         [ObservableProperty]
         GroceryList groceryList = new(0, "None", DateOnly.MinValue, "", 0);
+
         [ObservableProperty]
         string myMessage;
+
+        [ObservableProperty]
+        string searchText = "";
 
         public GroceryListItemsViewModel(IGroceryListItemsService groceryListItemsService, IProductService productService, IFileSaverService fileSaverService)
         {
@@ -43,13 +48,50 @@ namespace Grocery.App.ViewModels
         {
             AvailableProducts.Clear();
             foreach (Product p in _productService.GetAll())
-                if (MyGroceryListItems.FirstOrDefault(g => g.ProductId == p.Id) == null  && p.Stock > 0)
+                if (MyGroceryListItems.FirstOrDefault(g => g.ProductId == p.Id) == null && p.Stock > 0)
                     AvailableProducts.Add(p);
+
+            // initialiseer de gefilterde lijst met alle beschikbare producten
+            FilterProducts(SearchText);
         }
 
         partial void OnGroceryListChanged(GroceryList value)
         {
             Load(value.Id);
+        }
+
+        partial void OnSearchTextChanged(string value)
+        {
+            FilterProducts(value);
+        }
+
+        [RelayCommand]
+        public void Search(string searchTerm)
+        {
+            SearchText = searchTerm ?? "";
+            FilterProducts(SearchText);
+        }
+
+        private void FilterProducts(string searchTerm)
+        {
+            FilteredProducts.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                // laat alles zien zolang er nog niks is ingevuld
+                foreach (var product in AvailableProducts)
+                    FilteredProducts.Add(product);
+            }
+            else
+            {
+                //Filtert producten op basis van de zoekterm
+                var filteredList = AvailableProducts
+                    .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                foreach (var product in filteredList)
+                    FilteredProducts.Add(product);
+            }
         }
 
         [RelayCommand]
@@ -58,6 +100,7 @@ namespace Grocery.App.ViewModels
             Dictionary<string, object> paramater = new() { { nameof(GroceryList), GroceryList } };
             await Shell.Current.GoToAsync($"{nameof(ChangeColorView)}?Name={GroceryList.Name}", true, paramater);
         }
+
         [RelayCommand]
         public void AddProduct(Product product)
         {
@@ -67,6 +110,7 @@ namespace Grocery.App.ViewModels
             product.Stock--;
             _productService.Update(product);
             AvailableProducts.Remove(product);
+            FilteredProducts.Remove(product);
             OnGroceryListChanged(GroceryList);
         }
 
@@ -85,6 +129,5 @@ namespace Grocery.App.ViewModels
                 await Toast.Make($"Opslaan mislukt: {ex.Message}").Show(cancellationToken);
             }
         }
-
     }
 }
