@@ -25,14 +25,20 @@ jobs:
         dotnet workload install maui-android
         dotnet workload restore
         
+    - name: Temporarily modify csproj to only target Android
+      run: |
+        cd Grocery.App
+        sed -i 's/<TargetFrameworks>.*<\/TargetFrameworks>/<TargetFramework>net8.0-android<\/TargetFramework>/' Grocery.App.csproj
+        cat Grocery.App.csproj | grep -i target
+        
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Build Android target for tests
-      run: dotnet build Grocery.App/Grocery.App.csproj --configuration Release -f net8.0-android
+    - name: Build solution
+      run: dotnet build --configuration Release
       
-    - name: Run tests with Android target
-      run: dotnet test Grocery.App/Grocery.App.csproj --configuration Release -f net8.0-android --logger "trx;LogFileName=test-results.trx"
+    - name: Run all tests with results file
+      run: dotnet test --configuration Release --logger "trx;LogFileName=test-results.trx"
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
