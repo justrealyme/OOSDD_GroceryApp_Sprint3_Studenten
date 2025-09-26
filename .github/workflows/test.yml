@@ -24,8 +24,6 @@ jobs:
       run: |
         echo "📁 Directory listing:"
         ls -la
-        echo "📁 TestCore directory:"
-        ls -la TestCore/
         
     - name: Restore test project dependencies
       run: dotnet restore TestCore/TestCore.csproj
@@ -72,5 +70,21 @@ jobs:
         dotnet workload install maui-android
         dotnet workload restore
         
+    - name: Temporarily modify csproj to exclude iOS on Linux
+      run: |
+        cd Grocery.App
+        # Backup original file
+        cp Grocery.App.csproj Grocery.App.csproj.backup
+        # Replace TargetFrameworks with single TargetFramework for Android only
+        sed -i 's/<TargetFrameworks>.*<\/TargetFrameworks>/<TargetFramework>net8.0-android<\/TargetFramework>/g' Grocery.App.csproj
+        echo "Modified csproj content:"
+        grep -i target Grocery.App.csproj
+        
     - name: Build Android
-      run: dotnet build Grocery.App/Grocery.App.csproj -c Release -f net8.0-android
+      run: dotnet build Grocery.App/Grocery.App.csproj -c Release
+
+    - name: Restore original csproj
+      if: always()
+      run: |
+        cd Grocery.App
+        cp Grocery.App.csproj.backup Grocery.App.csproj
