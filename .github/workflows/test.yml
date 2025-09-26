@@ -20,11 +20,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
         
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Restore only test project dependencies
+      run: dotnet restore testcore.csproj
       
-    - name: Build solution
-      run: dotnet build --no-restore --configuration Release
+    - name: Build only test project
+      run: dotnet build testcore.csproj --no-restore --configuration Release
       
     - name: Run tests from test project only
       run: dotnet test testcore.csproj --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
