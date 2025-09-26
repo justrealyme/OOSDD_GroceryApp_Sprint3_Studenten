@@ -1,6 +1,6 @@
-﻿
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Grocery.App.Views;
 using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
 
@@ -10,6 +10,7 @@ namespace Grocery.App.ViewModels
     {
         private readonly IAuthService _authService;
         private readonly GlobalViewModel _global;
+        private readonly IServiceProvider _serviceProvider;
 
         [ObservableProperty]
         private string email = "user3@mail.com";
@@ -18,12 +19,13 @@ namespace Grocery.App.ViewModels
         private string password = "user3";
 
         [ObservableProperty]
-        private string loginMessage;
+        private string loginMessage = "";
 
-        public LoginViewModel(IAuthService authService, GlobalViewModel global)
-        { //_authService = App.Services.GetServices<IAuthService>().FirstOrDefault();
+        public LoginViewModel(IAuthService authService, GlobalViewModel global, IServiceProvider serviceProvider)
+        {
             _authService = authService;
             _global = global;
+            _serviceProvider = serviceProvider;
         }
 
         [RelayCommand]
@@ -39,6 +41,17 @@ namespace Grocery.App.ViewModels
             else
             {
                 LoginMessage = "Ongeldige inloggegevens.";
+            }
+        }
+
+        [RelayCommand]
+        private void GoToRegister()
+        {
+            // Gebruik de geïnjecteerde service provider
+            var registerView = _serviceProvider.GetService<RegisterView>();
+            if (registerView != null)
+            {
+                Application.Current.MainPage = registerView;
             }
         }
     }
